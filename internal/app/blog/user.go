@@ -35,3 +35,17 @@ func (u *User) ListUsersByNickNameAndEmail() []*User {
 	pkg.DB.Where(&u).Find(&users)
 	return users
 }
+
+func (u *User) UpdateUser(id string) *User {
+	user := GetUserById(id)
+	if user != nil {
+		pkg.DB.Model(user).Updates(&u)
+	}
+	return user
+}
+
+func DeleteUser(id string) *User {
+	user := GetUserById(id)
+	pkg.DB.Delete(&user, id)
+	return user
+}

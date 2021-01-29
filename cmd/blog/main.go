@@ -17,10 +17,11 @@ func init() {
 
 func main() {
 	r := gin.Default()
-	r.POST("/user", controller.CreateUser)
+	r.PUT("/user", controller.CreateUser)
 	r.GET("/user/:id", controller.GetUserById)
 	r.GET("/users", controller.ListUsers)
-	//r.GET("/user/:id", controller.ListUsersByNickName)
+	r.POST("/user/:id", controller.UpdateUser)
+	r.DELETE("/user/:id", controller.DeleteUser)
 	r.Run()
 }
 
