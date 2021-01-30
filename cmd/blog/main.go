@@ -1,30 +1,28 @@
 package main
 
 import (
-	"github.com/clairejyu/go-blog/internal/app/blog"
-	"github.com/clairejyu/go-blog/internal/app/blog/controller"
-	"github.com/clairejyu/go-blog/internal/pkg"
-	"github.com/clairejyu/go-blog/internal/pkg/setting"
+	"github.com/clairejyu/go-blog/cmd/blog/router"
+	"github.com/clairejyu/go-blog/internal/app/blog/article"
+	"github.com/clairejyu/go-blog/internal/app/blog/user"
+	"github.com/clairejyu/go-blog/internal/pkg/db"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 func init() {
-	setting.Setup()
-	db := pkg.InitDB()
+	db.Setup()
+	db := db.InitDB()
 	Migrator(db)
 }
 
 func main() {
 	r := gin.Default()
-	r.PUT("/user", controller.CreateUser)
-	r.GET("/user/:id", controller.GetUserById)
-	r.GET("/users", controller.ListUsers)
-	r.POST("/user/:id", controller.UpdateUser)
-	r.DELETE("/user/:id", controller.DeleteUser)
+	v1 := r.Group("/api")
+	router.User(v1.Group("/user"))
+	router.User(v1.Group("/article"))
 	r.Run()
 }
 
 func Migrator(db *gorm.DB) {
-	db.AutoMigrate(&blog.User{}, &blog.Article{})
+	db.AutoMigrate(&user.User{}, &article.Article{})
 }

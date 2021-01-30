@@ -1,10 +1,9 @@
-package pkg
+package db
 
 import (
 	"fmt"
 	"time"
 
-	"github.com/clairejyu/go-blog/internal/pkg/setting"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -13,13 +12,12 @@ type Database struct {
 	*gorm.DB
 }
 
-var DB *gorm.DB
+var D *gorm.DB
 
 // InitDB Opening a database and save the reference to `Database` struct.
 func InitDB() *gorm.DB {
-	dsn := "host=" + setting.DatabaseSetting.Host + " user=" + setting.DatabaseSetting.User + " password=" +
-		setting.DatabaseSetting.Password + " dbname=" + setting.DatabaseSetting.Name + " port=" + setting.DatabaseSetting.Port +
-		" sslmode=disable TimeZone=Asia/Shanghai"
+	dsn := "host=" + DBConfig.Host + " user=" + DBConfig.User + " password=" + DBConfig.Password + " dbname=" +
+		DBConfig.Name + " port=" + DBConfig.Port + " sslmode=disable TimeZone=Asia/Shanghai"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
@@ -36,8 +34,8 @@ func InitDB() *gorm.DB {
 	// SetConnMaxLifeti	1qme 设置了连接可复用的最大时间。
 	sqlDB.SetConnMaxLifetime(time.Hour)
 	//db.LogMode(true)
-	DB = db
-	return DB
+	D = db
+	return D
 }
 
 // GetDB Using this function to get a connection, you can create your connection pool here.

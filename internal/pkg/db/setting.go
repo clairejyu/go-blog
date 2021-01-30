@@ -1,4 +1,4 @@
-package setting
+package db
 
 import (
 	"log"
@@ -8,7 +8,7 @@ import (
 
 var cfg *ini.File
 
-type Database struct {
+type DatabaseConfig struct {
 	Type     string
 	User     string
 	Password string
@@ -17,7 +17,7 @@ type Database struct {
 	Name     string
 }
 
-var DatabaseSetting = &Database{}
+var DBConfig = &DatabaseConfig{}
 
 func Setup() {
 	var err error
@@ -26,7 +26,7 @@ func Setup() {
 		log.Fatalf("setting.Setup, fail to parse 'config/config_dev.ini': %v", err)
 	}
 
-	mapTo("database", DatabaseSetting)
+	mapTo("database", DBConfig)
 }
 
 func mapTo(section string, v interface{}) {
