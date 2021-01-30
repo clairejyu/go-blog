@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/clairejyu/go-blog/internal/app/blog/article"
 	"github.com/clairejyu/go-blog/internal/app/blog/user"
 	"github.com/gin-gonic/gin"
 )
@@ -14,5 +15,9 @@ func User(router *gin.RouterGroup) {
 }
 
 func Article(router *gin.RouterGroup) {
-
+	router.PUT("/", article.CreateArticle)
+	router.GET("/:id", article.GetArticleById)
+	router.GET("/", article.ListArticles)
+	router.POST("/:id", article.UpdateArticle)
+	router.DELETE("/:id", article.DeleteArticle)
 }

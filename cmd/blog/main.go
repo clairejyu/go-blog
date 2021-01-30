@@ -19,7 +19,7 @@ func main() {
 	r := gin.Default()
 	v1 := r.Group("/api")
 	router.User(v1.Group("/user"))
-	router.User(v1.Group("/article"))
+	router.Article(v1.Group("/article"))
 	r.Run()
 }
 

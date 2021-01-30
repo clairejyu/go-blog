@@ -21,5 +21,4 @@ require (
 	gorm.io/driver/postgres v1.0.7
 	gorm.io/gorm v1.20.12
 	github.com/iancoleman/strcase v0.1.3
-
 )
