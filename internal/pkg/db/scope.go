@@ -2,8 +2,10 @@ package db
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/iancoleman/strcase"
 	"gorm.io/gorm"
 )
 
@@ -24,5 +26,15 @@ func Paginate(c *gin.Context) func(db *gorm.DB) *gorm.DB {
 
 		offset := (page - 1) * pageSize
 		return db.Offset(offset).Limit(pageSize)
+	}
+}
+
+func Like(c *gin.Context, key string) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		value := c.Query(key)
+		if strings.TrimSpace(value) != "" {
+			db = db.Where(strcase.ToSnake(key)+" LIKE ?", "%"+value+"%")
+		}
+		return db
 	}
 }

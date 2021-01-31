@@ -6,6 +6,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type Database struct {
@@ -20,6 +21,7 @@ func InitDB() *gorm.DB {
 		DBConfig.Name + " port=" + DBConfig.Port + " sslmode=disable TimeZone=Asia/Shanghai"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
+		Logger:                                   logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		fmt.Println("db err: ", err)

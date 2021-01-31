@@ -22,14 +22,14 @@ func (a *Article) Create() *gorm.DB {
 
 func GetById(id string) *Article {
 	var article Article
-	db.D.Joins("User").First(&article, id)
+	db.D.Preload("User").First(&article, id)
 	return &article
 }
 
 func List(c *gin.Context) []*Article {
 	var articles []*Article
 	d := db.D
-	d.Scopes(db.Like(c, "title"), AuthorAndState(c), db.Paginate(c)).Joins("User").Order("created_at desc").Find(&articles)
+	d.Scopes(db.Like(c, "title"), AuthorAndState(c), db.Paginate(c)).Preload("User").Order("created_at desc").Find(&articles)
 	return articles
 }
 
