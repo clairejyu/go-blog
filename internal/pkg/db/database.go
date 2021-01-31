@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -14,6 +15,7 @@ type Database struct {
 }
 
 var D *gorm.DB
+var SqlDB *sql.DB
 
 // InitDB Opening a database and save the reference to `Database` struct.
 func InitDB() *gorm.DB {
@@ -37,10 +39,11 @@ func InitDB() *gorm.DB {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 	//db.LogMode(true)
 	D = db
+	SqlDB = sqlDB
 	return D
 }
 
-// GetDB Using this function to get a connection, you can create your connection pool here.
-// func GetDB() *gorm.DB {
-// 	return DB
-// }
+func Init() {
+	Setup()
+	InitDB()
+}

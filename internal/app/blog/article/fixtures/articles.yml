@@ -1,0 +1,17 @@
+- id: 1
+  title: A comment...
+  user_id: 1
+  content: John Doe
+  state: 2
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+  deleted_at: 
+
+- id: 2
+  title: John Doe
+  user_id: 2
+  content: Another comment...
+  state: 1
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+  deleted_at: 

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"flag"
 	"log"
 
 	"github.com/go-ini/ini"
@@ -21,9 +22,15 @@ var DBConfig = &DatabaseConfig{}
 
 func Setup() {
 	var err error
-	cfg, err = ini.Load("/Users/jyu/go/src/github.com/clairejyu/go-blog/config/config_dev.ini")
+
+	if flag.Lookup("test.v") == nil {
+		cfg, err = ini.Load("/Users/jyu/go/src/github.com/clairejyu/go-blog/config/config_dev.ini")
+	} else {
+		cfg, err = ini.Load("/Users/jyu/go/src/github.com/clairejyu/go-blog/config/config_test.ini")
+	}
+
 	if err != nil {
-		log.Fatalf("setting.Setup, fail to parse 'config/config_dev.ini': %v", err)
+		log.Fatalf("setting.Setup, fail to parse 'config.ini': %v", err)
 	}
 
 	mapTo("database", DBConfig)

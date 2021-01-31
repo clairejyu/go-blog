@@ -6,13 +6,12 @@ import (
 	"github.com/clairejyu/go-blog/internal/app/blog/user"
 	"github.com/clairejyu/go-blog/internal/pkg/db"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func init() {
-	db.Setup()
-	db := db.InitDB()
-	Migrator(db)
+	db.Init()
+	user.InitDB(db.D)
+	article.InitDB(db.D)
 }
 
 func main() {
@@ -21,8 +20,4 @@ func main() {
 	router.User(v1.Group("/user"))
 	router.Article(v1.Group("/article"))
 	r.Run()
-}
-
-func Migrator(db *gorm.DB) {
-	db.AutoMigrate(&user.User{}, &article.Article{})
 }
