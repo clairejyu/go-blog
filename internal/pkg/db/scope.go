@@ -11,12 +11,8 @@ import (
 
 func Paginate(c *gin.Context) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		page, _ := strconv.Atoi(c.Query("page"))
-		if page == 0 {
-			page = 1
-		}
-
-		pageSize, _ := strconv.Atoi(c.Query("page_size"))
+		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 		switch {
 		case pageSize > 100:
 			pageSize = 100

@@ -3,34 +3,34 @@ package user
 import (
 	"net/http"
 
+	"github.com/clairejyu/go-blog/internal/pkg/common"
 	"github.com/gin-gonic/gin"
 )
 
 func CreateUser(c *gin.Context) {
 	var user User
-	c.Bind(&user)
-	user.Create()
-	c.JSON(http.StatusOK, user)
+	err := c.ShouldBind(&user)
+	if err != nil {
+		common.Fail(http.StatusBadRequest, err.Error()).JSON(c)
+	} else {
+		user.Create().JSON(c)
+	}
 }
 
 func GetUserById(c *gin.Context) {
-	id := c.Param("id")
-	user := GetById(id)
-	c.JSON(http.StatusOK, user)
+	GetById(c.Param("id")).JSON(c)
 }
 
 func ListUsers(c *gin.Context) {
-	c.JSON(http.StatusOK, List(c))
+	List(c).JSON(c)
 }
 
 func UpdateUser(c *gin.Context) {
-	id := c.Param("id")
 	var user User
-	c.Bind(&user)
-	c.JSON(http.StatusOK, user.Update(id))
+	c.ShouldBind(&user)
+	user.Update(c.Param("id")).JSON(c)
 }
 
 func DeleteUser(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, Delete(id))
+	Delete(c.Param("id")).JSON(c)
 }

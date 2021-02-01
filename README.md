@@ -1,4 +1,3 @@
 # TODOS
-- like
-- viper
-- test
+- args
+- errors
