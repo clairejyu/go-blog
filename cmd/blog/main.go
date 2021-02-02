@@ -17,6 +17,7 @@ func init() {
 func main() {
 	r := gin.Default()
 	v1 := r.Group("/api")
+	router.Auth(v1)
 	router.User(v1.Group("/user"))
 	router.Article(v1.Group("/article"))
 	r.Run()

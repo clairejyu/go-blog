@@ -6,6 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func Auth(router *gin.RouterGroup) {
+	router.POST("/login", user.Login)
+	router.POST("/change-password", user.ChangePassword)
+}
+
 func User(router *gin.RouterGroup) {
 	router.PUT("/", user.CreateUser)
 	router.GET("/:id", user.GetUserById)

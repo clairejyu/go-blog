@@ -3,6 +3,7 @@ module github.com/clairejyu/go-blog
 go 1.15
 
 require (
+	github.com/andskur/argon2-hashing v0.1.3
 	github.com/gin-contrib/sse v0.1.1-0.20200815104636-06e6e3d866e4 // indirect
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-ini/ini v1.62.0

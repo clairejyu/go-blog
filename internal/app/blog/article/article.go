@@ -50,7 +50,7 @@ func (a *Article) Update(id string) *common.Message {
 	if article.Code != 200 {
 		return common.Fail(article.Code, "the id of article had not found. "+article.Err)
 	}
-	result := db.D.Model(article).Updates(&a)
+	result := db.D.Model(article.Obj).Updates(&a)
 	if result.Error != nil {
 		return common.Fail(http.StatusInternalServerError, result.Error.Error())
 	}
@@ -62,7 +62,7 @@ func Delete(id string) *common.Message {
 	if article.Code != 200 {
 		return common.Fail(article.Code, "the id of article had not found. "+article.Err)
 	}
-	result := db.D.Delete(&article, id)
+	result := db.D.Delete(&article.Obj, id)
 	if result.Error != nil {
 		return common.Fail(http.StatusInternalServerError, result.Error.Error())
 	}

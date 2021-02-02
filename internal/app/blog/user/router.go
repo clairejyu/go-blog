@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/clairejyu/go-blog/internal/pkg/common"
@@ -33,4 +34,19 @@ func UpdateUser(c *gin.Context) {
 
 func DeleteUser(c *gin.Context) {
 	Delete(c.Param("id")).JSON(c)
+}
+
+func Login(c *gin.Context) {
+	fmt.Println("c ", c)
+	SignIn(c.Query("email"), c.Query("password")).JSON(c)
+}
+
+func ChangePassword(c *gin.Context) {
+	email := c.Query("email")
+	user, err := GetByEmail(email)
+	if err != nil {
+		common.Fail(http.StatusInternalServerError, err.Error()).JSON(c)
+	} else {
+		user.UpdatePassword(c.Query("originPassword"), c.Query("newPassword")).JSON(c)
+	}
 }

@@ -1,8 +1,11 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
+	"github.com/andskur/argon2-hashing"
 	"github.com/clairejyu/go-blog/internal/pkg/common"
 	"github.com/clairejyu/go-blog/internal/pkg/db"
 	"github.com/gin-gonic/gin"
@@ -13,15 +16,22 @@ type User struct {
 	gorm.Model
 	NickName string `json:"nickName" binding:"required,min=1,max=255"`
 	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6,max=255`
+	Password string `json:"-" binding:"required,min=6,max=255`
 }
 
 func (u *User) Create() *common.Message {
+	// Generates a derived key with default params
+	hash, err := argon2.GenerateFromPassword([]byte(u.Password), argon2.DefaultParams)
+	if err != nil {
+		return common.Fail(http.StatusInternalServerError, err.Error())
+	}
+
+	u.Password = string(hash)
 	result := db.D.Create(&u)
 	if result.Error != nil {
 		return common.Fail(http.StatusInternalServerError, result.Error.Error())
 	}
-	return common.Success("ok", result)
+	return common.Success("ok", u)
 }
 
 func GetById(id string) *common.Message {
@@ -42,10 +52,13 @@ func List(c *gin.Context) *common.Message {
 	return common.Success("ok", users)
 }
 
-func (u *User) ListUsersByNickNameAndEmail() []*User {
-	var users []*User
-	db.D.Where(&u).Find(&users)
-	return users
+func GetByEmail(email string) (*User, error) {
+	var user User
+	result := db.D.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
 }
 
 func (u *User) Update(id string) *common.Message {
@@ -54,11 +67,39 @@ func (u *User) Update(id string) *common.Message {
 		return common.Fail(user.Code, "the id of user had not found. "+user.Err)
 	}
 
-	result := db.D.Model(user).Updates(&u)
+	if strings.TrimSpace(u.Password) != "" {
+		// Generates a derived key with default params
+		hash, err := argon2.GenerateFromPassword([]byte(u.Password), argon2.DefaultParams)
+		if err != nil {
+			return common.Fail(http.StatusInternalServerError, err.Error())
+		}
+		u.Password = string(hash)
+	}
+
+	result := db.D.Model(user.Obj).Updates(User{NickName: u.NickName, Email: u.Email})
 	if result.Error != nil {
 		return common.Fail(http.StatusInternalServerError, result.Error.Error())
 	}
 	return user
+}
+
+func (u *User) UpdatePassword(originPassword string, newPassword string) *common.Message {
+	err := argon2.CompareHashAndPassword([]byte(u.Password), []byte(originPassword))
+	if err != nil {
+		return common.Fail(http.StatusBadRequest, "origin password not correct. "+err.Error())
+	}
+
+	// Generates a derived key with default params
+	hash, err := argon2.GenerateFromPassword([]byte(newPassword), argon2.DefaultParams)
+	if err != nil {
+		return common.Fail(http.StatusInternalServerError, err.Error())
+	}
+
+	result := db.D.Model(&u).Update("password", hash)
+	if result.Error != nil {
+		return common.Fail(http.StatusInternalServerError, result.Error.Error())
+	}
+	return common.Success("change succeed", nil)
 }
 
 func Delete(id string) *common.Message {
@@ -67,9 +108,24 @@ func Delete(id string) *common.Message {
 		return common.Fail(user.Code, "the id of user had not found. "+user.Err)
 	}
 
-	result := db.D.Delete(&user, id)
+	result := db.D.Delete(&user.Obj, id)
 	if result.Error != nil {
 		return common.Fail(http.StatusInternalServerError, result.Error.Error())
 	}
 	return user
+}
+
+func SignIn(email string, password string) *common.Message {
+	fmt.Println(email, password)
+	user, err := GetByEmail(email)
+	if err != nil {
+		return common.Fail(http.StatusBadRequest, "user not found. "+err.Error())
+	}
+
+	// Uses the parameters from the existing derived key. Return an error if they don't match.
+	err = argon2.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return common.Fail(http.StatusBadRequest, "password not correct. "+err.Error())
+	}
+	return common.Success("login succeed", user)
 }
