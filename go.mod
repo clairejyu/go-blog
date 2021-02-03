@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/andskur/argon2-hashing v0.1.3
+	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-contrib/sse v0.1.1-0.20200815104636-06e6e3d866e4 // indirect
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-ini/ini v1.62.0
@@ -18,7 +19,6 @@ require (
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/ugorji/go v1.2.3 // indirect
 	google.golang.org/protobuf v1.25.1-0.20210121235814-f1ac97a4c3fa // indirect
-	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gorm.io/driver/postgres v1.0.7

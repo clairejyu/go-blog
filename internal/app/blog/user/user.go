@@ -61,6 +61,15 @@ func GetByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
+func ByEmail(email string) (interface{}, error) {
+	var user User
+	result := db.D.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
+}
+
 func (u *User) Update(id string) *common.Message {
 	user := GetById(id)
 	if user.Code != 200 {

@@ -9,6 +9,7 @@ import (
 func Auth(router *gin.RouterGroup) {
 	router.POST("/login", user.Login)
 	router.POST("/change-password", user.ChangePassword)
+	router.DELETE("/exit", user.Exit)
 }
 
 func User(router *gin.RouterGroup) {
