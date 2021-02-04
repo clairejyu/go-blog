@@ -1,13 +1,24 @@
 package article
 
 import (
+	"net/http"
+	"strconv"
+
+	"github.com/clairejyu/go-blog/internal/app/blog/user"
+	"github.com/clairejyu/go-blog/internal/pkg/common"
 	"github.com/gin-gonic/gin"
 )
 
+var session = common.SessionHelper(user.ByEmail)
+
 func CreateArticle(c *gin.Context) {
-	var article Article
-	c.ShouldBind(&article)
-	article.Create().JSON(c)
+	session(c, func(u interface{}) {
+		currentUser := u.(*user.User)
+		var article Article
+		c.ShouldBind(&article)
+		article.UserID = currentUser.ID
+		article.Create().JSON(c)
+	})
 }
 
 func GetArticleById(c *gin.Context) {
@@ -19,11 +30,27 @@ func ListArticles(c *gin.Context) {
 }
 
 func UpdateArticle(c *gin.Context) {
-	var article Article
-	c.ShouldBind(&article)
-	article.Update(c.Param("id")).JSON(c)
+	session(c, func(u interface{}) {
+		currentUser := u.(*user.User)
+		id := c.Param("id")
+		if id == strconv.FormatUint(uint64(currentUser.ID), 10) {
+			var article Article
+			c.ShouldBind(&article)
+			article.Update(id).JSON(c)
+		} else {
+			common.Fail(http.StatusForbidden, "need login").JSON(c)
+		}
+	})
 }
 
 func DeleteArticle(c *gin.Context) {
-	Delete(c.Param("id")).JSON(c)
+	session(c, func(u interface{}) {
+		currentUser := u.(*user.User)
+		id := c.Param("id")
+		if id == strconv.FormatUint(uint64(currentUser.ID), 10) {
+			Delete(id).JSON(c)
+		} else {
+			common.Fail(http.StatusForbidden, "need login").JSON(c)
+		}
+	})
 }

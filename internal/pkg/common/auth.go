@@ -19,6 +19,8 @@ func checkSession(c *gin.Context, getUser func(email string) (interface{}, error
 	if email != nil {
 		user, err := getUser(email.(string))
 		if err != nil {
+			Fail(http.StatusInternalServerError, err.Error()).JSON(c)
+		} else {
 			callback(user)
 		}
 	} else {

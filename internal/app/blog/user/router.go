@@ -37,7 +37,7 @@ func UpdateUser(c *gin.Context) {
 		if id == strconv.FormatUint(uint64(currentUser.ID), 10) {
 			var user User
 			c.ShouldBind(&user)
-			user.Update(c.Param("id")).JSON(c)
+			user.Update(id).JSON(c)
 		} else {
 			common.Fail(http.StatusForbidden, "need login").JSON(c)
 		}

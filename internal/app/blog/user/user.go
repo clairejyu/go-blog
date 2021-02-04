@@ -27,9 +27,15 @@ func (u *User) Create() *common.Message {
 	}
 
 	u.Password = string(hash)
-	result := db.D.Create(&u)
-	if result.Error != nil {
-		return common.Fail(http.StatusInternalServerError, result.Error.Error())
+	result := db.D.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&u).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if result != nil {
+		return common.Fail(http.StatusInternalServerError, result.Error())
 	}
 	return common.Success("ok", u)
 }
@@ -85,9 +91,15 @@ func (u *User) Update(id string) *common.Message {
 		u.Password = string(hash)
 	}
 
-	result := db.D.Model(user.Obj).Updates(User{NickName: u.NickName, Email: u.Email})
-	if result.Error != nil {
-		return common.Fail(http.StatusInternalServerError, result.Error.Error())
+	result := db.D.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(user.Obj).Updates(User{NickName: u.NickName, Email: u.Email}).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if result != nil {
+		return common.Fail(http.StatusInternalServerError, result.Error())
 	}
 	return user
 }
@@ -104,9 +116,15 @@ func (u *User) UpdatePassword(originPassword string, newPassword string) *common
 		return common.Fail(http.StatusInternalServerError, err.Error())
 	}
 
-	result := db.D.Model(&u).Update("password", hash)
-	if result.Error != nil {
-		return common.Fail(http.StatusInternalServerError, result.Error.Error())
+	result := db.D.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&u).Update("password", hash).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if result != nil {
+		return common.Fail(http.StatusInternalServerError, result.Error())
 	}
 	return common.Success("change succeed", nil)
 }
@@ -117,9 +135,15 @@ func Delete(id string) *common.Message {
 		return common.Fail(user.Code, "the id of user had not found. "+user.Err)
 	}
 
-	result := db.D.Delete(&user.Obj, id)
-	if result.Error != nil {
-		return common.Fail(http.StatusInternalServerError, result.Error.Error())
+	result := db.D.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Delete(&user.Obj, id).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if result != nil {
+		return common.Fail(http.StatusInternalServerError, result.Error())
 	}
 	return user
 }

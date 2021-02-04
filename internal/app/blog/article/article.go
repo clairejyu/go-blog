@@ -20,11 +20,22 @@ type Article struct {
 }
 
 func (a *Article) Create() *common.Message {
-	result := db.D.Create(&a)
-	if result.Error != nil {
-		return common.Fail(http.StatusInternalServerError, result.Error.Error())
+	result := db.D.Transaction(func(tx *gorm.DB) error {
+		// 在事务中执行一些 db 操作（从这里开始，您应该使用 'tx' 而不是 'db'）
+		if err := tx.Create(&a).Error; err != nil {
+			// 返回任何错误都会回滚事务
+			return err
+		}
+
+		// 返回 nil 提交事务
+		return nil
+	})
+
+	if result != nil {
+		return common.Fail(http.StatusInternalServerError, result.Error())
 	}
-	return common.Success("ok", result)
+
+	return common.Success("ok", a)
 }
 
 func GetById(id string) *common.Message {
@@ -50,9 +61,17 @@ func (a *Article) Update(id string) *common.Message {
 	if article.Code != 200 {
 		return common.Fail(article.Code, "the id of article had not found. "+article.Err)
 	}
-	result := db.D.Model(article.Obj).Updates(&a)
-	if result.Error != nil {
-		return common.Fail(http.StatusInternalServerError, result.Error.Error())
+
+	result := db.D.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(article.Obj).Updates(&a).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if result != nil {
+		return common.Fail(http.StatusInternalServerError, result.Error())
 	}
 	return article
 }
@@ -62,9 +81,17 @@ func Delete(id string) *common.Message {
 	if article.Code != 200 {
 		return common.Fail(article.Code, "the id of article had not found. "+article.Err)
 	}
-	result := db.D.Delete(&article.Obj, id)
-	if result.Error != nil {
-		return common.Fail(http.StatusInternalServerError, result.Error.Error())
+
+	result := db.D.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Delete(&article.Obj, id).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if result != nil {
+		return common.Fail(http.StatusInternalServerError, result.Error())
 	}
 	return article
 }
