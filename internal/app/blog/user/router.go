@@ -10,15 +10,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var session = common.SessionHelper(ByEmail)
-
 func CreateUser(c *gin.Context) {
-	var user User
-	err := c.ShouldBind(&user)
+	var register Register
+	err := c.ShouldBind(&register)
 	if err != nil {
 		common.Fail(http.StatusBadRequest, err.Error()).JSON(c)
 	} else {
-		user.Create().JSON(c)
+		register.Create().JSON(c)
 	}
 }
 
@@ -31,7 +29,7 @@ func ListUsers(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	session(c, func(u interface{}) {
+	common.NeedLogin(c, func(u interface{}) {
 		currentUser := u.(User)
 		id := c.Param("id")
 		if id == strconv.FormatUint(uint64(currentUser.ID), 10) {
@@ -48,19 +46,30 @@ func DeleteUser(c *gin.Context) {
 	Delete(c.Param("id")).JSON(c)
 }
 
+type LoginParam struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6,max=255`
+}
+
 func Login(c *gin.Context) {
-	email := c.Query("email")
-	result := SignIn(email, c.Query("password"))
-	if result.Code == 200 {
-		session := sessions.Default(c)
-		session.Set("email", email)
-		session.Save()
+	var param LoginParam
+	err := c.ShouldBind(&param)
+	if err != nil {
+		common.Fail(http.StatusBadRequest, err.Error()).JSON(c)
+	} else {
+		email := param.Email
+		result := SignIn(param.Email, param.Password)
+		if result.Code == 200 {
+			session := sessions.Default(c)
+			session.Set("email", email)
+			session.Save()
+		}
+		result.JSON(c)
 	}
-	result.JSON(c)
 }
 
 func ChangePassword(c *gin.Context) {
-	session(c, func(u interface{}) {
+	common.NeedLogin(c, func(u interface{}) {
 		user := u.(User)
 		user.UpdatePassword(c.Query("originPassword"), c.Query("newPassword")).JSON(c)
 	})

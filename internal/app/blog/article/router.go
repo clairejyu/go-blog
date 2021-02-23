@@ -9,10 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var session = common.SessionHelper(user.ByEmail)
-
 func CreateArticle(c *gin.Context) {
-	session(c, func(u interface{}) {
+	common.NeedLogin(c, func(u interface{}) {
 		currentUser := u.(*user.User)
 		var article Article
 		c.ShouldBind(&article)
@@ -30,7 +28,7 @@ func ListArticles(c *gin.Context) {
 }
 
 func UpdateArticle(c *gin.Context) {
-	session(c, func(u interface{}) {
+	common.NeedLogin(c, func(u interface{}) {
 		currentUser := u.(*user.User)
 		id := c.Param("id")
 		if id == strconv.FormatUint(uint64(currentUser.ID), 10) {
@@ -44,7 +42,7 @@ func UpdateArticle(c *gin.Context) {
 }
 
 func DeleteArticle(c *gin.Context) {
-	session(c, func(u interface{}) {
+	common.NeedLogin(c, func(u interface{}) {
 		currentUser := u.(*user.User)
 		id := c.Param("id")
 		if id == strconv.FormatUint(uint64(currentUser.ID), 10) {

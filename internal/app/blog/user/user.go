@@ -19,7 +19,17 @@ type User struct {
 	Password string `json:"-" binding:"required,min=6,max=255`
 }
 
-func (u *User) Create() *common.Message {
+type Register struct {
+	User
+	Password string `json:"password" binding:"required,min=6,max=255`
+}
+
+func (u *Register) Create() *common.Message {
+	_, err := GetByEmail(u.Email)
+	if err == nil {
+		return common.Fail(http.StatusBadRequest, "user exist. ")
+	}
+
 	// Generates a derived key with default params
 	hash, err := argon2.GenerateFromPassword([]byte(u.Password), argon2.DefaultParams)
 	if err != nil {
@@ -28,7 +38,7 @@ func (u *User) Create() *common.Message {
 
 	u.Password = string(hash)
 	result := db.D.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(&u).Error; err != nil {
+		if err := tx.Table("users").Create(&u).Error; err != nil {
 			return err
 		}
 		return nil
@@ -149,7 +159,6 @@ func Delete(id string) *common.Message {
 }
 
 func SignIn(email string, password string) *common.Message {
-	fmt.Println(email, password)
 	user, err := GetByEmail(email)
 	if err != nil {
 		return common.Fail(http.StatusBadRequest, "user not found. "+err.Error())
@@ -157,6 +166,7 @@ func SignIn(email string, password string) *common.Message {
 
 	// Uses the parameters from the existing derived key. Return an error if they don't match.
 	err = argon2.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	fmt.Println(password)
 	if err != nil {
 		return common.Fail(http.StatusBadRequest, "password not correct. "+err.Error())
 	}
